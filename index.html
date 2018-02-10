@@ -3,24 +3,153 @@
 <head>
 <meta charset="utf-8"> 
 <link rel="stylesheet" href="style/style.css">
-	<script src="webOSjs-0.1.0/webOS.js" charset="utf-8"></script>
-	<script type="text/javascript">
-	   //sample code for calling LS2 API
-       var lunaReq= webOS.service.request("luna://com.palm.systemservice",
-        {
-            method:"clock/getTime",
-            parameters:{},
-            onSuccess: function (args) {
-				console.log("UTC:", args.utc);
-            },
-            onFailure: function (args) {
-            }
-        });
-	</script>
+<script src="webOSjs-0.1.0/webOS.js" charset="utf-8"></script>
+<script type="text/javascript">
+	//sample code for calling LS2 API
+    var lunaReq= webOS.service.request("luna://com.palm.systemservice",
+    {
+        method:"clock/getTime",
+        parameters:{},
+        onSuccess: function (args) {
+			console.log("UTC:", args.utc);
+        },
+        onFailure: function (args) {
+        }
+    });
+	
+    var ws2 = new WebSocket("wss://api2.bitfinex.com:3000/ws");
+    
+    ws2.onopen = function(){
+		   ws2.send(JSON.stringify({"event":"subscribe", "channel":"ticker", "pair":"BTCUSD"}));
+	};
+    var ws3 = new WebSocket("wss://api2.bitfinex.com:3000/ws");
+    
+    ws3.onopen = function(){
+		   ws3.send(JSON.stringify({"event":"subscribe", "channel":"ticker", "pair":"ETHUSD"}));
+	};
+	var ws4 = new WebSocket("wss://api2.bitfinex.com:3000/ws");
+    
+    ws4.onopen = function(){ // zcash
+		   ws4.send(JSON.stringify({"event":"subscribe", "channel":"ticker", "pair":"ZECUSD"}));
+	};
+</script>
+
+
 </head>
 <body>
-	<div>
-		
+<div class="bx" data-currency="bitcoin">
+	<div style="border-radius: 10px;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;min-width:285px;">
+		<div>
+			<div style="float:right;width: 67%;margin-top: 13px;">
+				<span style="span style=;margin-top: 15px; color: #FFB80D;font-size: 89px;">Bitcoin (BTC)</span>
+				<span id="Arrow">
+					
+				</span>
+				<br>
+				<span id="price" style="font-size: 81px; transition: color 2s;">0</span><span style="font-size: 81px;">USD</span>
+				
+			</div>
+			
+			<div style="text-align:center;padding:5px 0px;width:33%;">
+				<img class="log" style="width:225px; " src="image/bitcoin-logo.png">
+			</div>
+		</div> 
 	</div>
+</div>
+<br>
+<br>
+<div class="bx" data-currency="ethereym">
+	<div style="border-radius: 10px;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;min-width:285px;">
+		<div>
+			<div style="float:right;width: 67%;margin-top: 13px;">
+				<span style="span style=;margin-top: 15px; color: #FFB80D;font-size: 89px;">Ethereum (ETH)</span>
+				<span id="ArrowETH">
+					
+				</span>
+				<br>
+				<span id="priceETH" style="font-size: 81px; transition: color 2s;">0</span><span style="font-size: 81px;">USD</span>
+				
+			</div>
+			
+			<div style="text-align:center;padding:5px 0px;width:33%;">
+				<img class="log" style="width:225px; " src="image/eth.png">
+			</div>
+		</div> 
+	</div>
+</div>
+<br>
+<br>
+<div class="bx" data-currency="zcash">
+	<div style="border-radius: 10px;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;min-width:285px;">
+		<div>
+			<div style="float:right;width: 67%;margin-top: 13px;">
+				<span style="span style=;margin-top: 15px; color: #FFB80D;font-size: 89px;">Zcash (ZEC)</span>
+				<span id="ArrowZEC">
+					
+				</span>
+				<br>
+				<span id="priceZEC" style="font-size: 81px; transition: color 2s;">0</span><span style="font-size: 81px;">USD</span>
+				
+			</div>
+			
+			<div style="text-align:center;padding:5px 0px;width:33%;">
+				<img class="log" style="width:225px; " src="image/zec.png">
+			</div>
+		</div> 
+	</div>
+</div>
+	<script type="text/javascript">
+			ws2.onmessage = function(msg){
+			    var resp = JSON.parse(msg.data);
+				var price = Number(document.getElementById("price").innerHTML);
+				
+				var hb = resp[1];
+				if(hb != "hb" && hb != undefined){
+					if(price > Number(resp[3])){
+						document.getElementById("price").style.color = "#FF0000";
+						document.getElementById("Arrow").innerHTML = '<img id="gener" style="width: 220px;float:  right;" src="image/Down.png">';
+					} else{
+						document.getElementById("price").style.color = "#00FF00";
+						document.getElementById("Arrow").innerHTML = '<img id="gener" style="width: 220px;float:  right;" src="image/Up.png">';
+					}
+					document.getElementById("price").innerHTML = resp[3] + "  ";
+					
+				}
+			};
+			ws3.onmessage = function(msg){ // Ethereum
+			    var resp = JSON.parse(msg.data);
+				var price = Number(document.getElementById("priceETH").innerHTML);
+				
+				var hb = resp[1];
+				if(hb != "hb" && hb != undefined){
+					if(price > Number(resp[3])){
+						document.getElementById("priceETH").style.color = "#FF0000";
+						document.getElementById("ArrowETH").innerHTML = '<img id="gener" style="width: 220px;float:  right;" src="image/Down.png">';
+					} else{
+						document.getElementById("priceETH").style.color = "#00FF00";
+						document.getElementById("ArrowETH").innerHTML = '<img id="gener" style="width: 220px;float:  right;" src="image/Up.png">';
+					}
+					document.getElementById("priceETH").innerHTML = resp[3] + "  ";
+					
+				}
+			};
+			ws4.onmessage = function(msg){ // Zec
+			    var resp = JSON.parse(msg.data);
+				var price = Number(document.getElementById("priceZEC").innerHTML);
+				
+				var hb = resp[1];
+				if(hb != "hb" && hb != undefined){
+					if(price > Number(resp[3])){
+						document.getElementById("priceZEC").style.color = "#FF0000";
+						document.getElementById("ArrowZEC").innerHTML = '<img id="gener" style="width: 220px;float:  right;" src="image/Down.png">';
+					} else{
+						document.getElementById("priceZEC").style.color = "#00FF00";
+						document.getElementById("ArrowZEC").innerHTML = '<img id="gener" style="width: 220px;float:  right;" src="image/Up.png">';
+					}
+					document.getElementById("priceZEC").innerHTML = resp[3] + "  ";
+					
+				}
+			};
+	</script>
 </body>
 </html>
