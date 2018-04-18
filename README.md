@@ -1,1 +1,1 @@
-Curve application for WebOS TV
+application for WebOS TV
